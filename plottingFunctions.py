@@ -59,6 +59,16 @@ def landmask():
     return landMask
 
 
+def circleBoundary():
+    ## gives polar stereographic maps a circular border
+    import numpy as np
+    import matplotlib.path as mpath
+    theta = np.linspace(0, 2*np.pi, 100)
+    center, radius = [0.5, 0.5], 0.5
+    verts = np.vstack([np.sin(theta), np.cos(theta)]).T
+    circle = mpath.Path(verts * radius + center)
+    return circle
+
 
 def make_maps(var1,latitude,longitude,vmins,vmaxs,levs,mycmap,label,title,savetitle,extend,addPatch,datadir,figuredir):
     from plottingFunctions import get_colormap, landmask
