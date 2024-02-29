@@ -185,3 +185,73 @@ def make_maps(var1,latitude,longitude,vmins,vmaxs,levs,mycmap,label,title,saveti
     plt.savefig(figuredir + str(savetitle) + '.png', dpi=1200, bbox_inches='tight')
     return fig, ax
 
+
+def mapsSubplotsDiff(axs,var,lat,lon,lon2,thawFBnonan,thawCNnonan,thawAlways,norm,i,canada):
+    ## used for showing difference in talik formation timing between all 
+    ##      ARISE and SSP ensemble members
+    import cartopy.crs as ccrs
+    from matplotlib import colors as c
+    import numpy as np
+    import matplotlib.path as mpath
+    from plottingFunctions import get_colormap
+    brbg_cmap,rdbu_cmap,jet,magma,reds,hot,seismic = get_colormap(51)
+    from matplotlib import cm
+    bwr = cm.get_cmap('bwr',((31)))
+    
+    vfont = {'fontname':'Verdana'}
+    cMapthawedControlNotFeedback = c.ListedColormap(['xkcd:aqua blue'])
+    cMapthawedFeedbackNotControl = c.ListedColormap(['xkcd:bright yellow'])
+    cMapALWAYSTHAW = c.ListedColormap(['k'])
+    
+    if canada: 
+        axs.set_extent([-115, -50, 50, 70], crs=ccrs.PlateCarree())
+        
+    else:
+        theta = np.linspace(0, 2*np.pi, 100)
+        center, radius = [0.5, 0.5], 0.5
+        verts = np.vstack([np.sin(theta), np.cos(theta)]).T
+        circle = mpath.Path(verts * radius + center)
+        axs.set_extent([180, -180, 50, 90], crs=ccrs.PlateCarree())
+        axs.set_boundary(circle, transform=axs.transAxes)
+    
+    axs.set_facecolor('0.8')
+
+    ## thawed in control but not feedback
+    axs.pcolormesh(lon,lat,thawFBnonan,transform=ccrs.PlateCarree(),
+                        cmap=cMapthawedControlNotFeedback)
+    ## thawed in feedback but not control
+    axs.pcolormesh(lon,lat,thawCNnonan,transform=ccrs.PlateCarree(),
+                        cmap=cMapthawedFeedbackNotControl)
+    ## always thawed = gray
+    axs.pcolormesh(lon,lat,thawAlways,transform=ccrs.PlateCarree(),
+                        cmap=cMapALWAYSTHAW)
+    
+    ## difference in thaw timing
+    cf1 = axs.pcolormesh(lon2,lat,var,transform=ccrs.PlateCarree(), 
+                  norm=norm, cmap=bwr)
+    axs.coastlines(linewidth=0.4)
+    axs.set_title("Ens 0" + str(i), fontsize=8, y=0.99, **vfont)
+    return axs,cf1
+
+
+def mapsSubplots(axs,var,lat,lon2,levs,norm,i,cmap):
+    ## used for ensemble member maps that are NOT talik formation
+    import cartopy.crs as ccrs
+    import numpy as np
+    import matplotlib.path as mpath
+    theta = np.linspace(0, 2*np.pi, 100)
+    center, radius = [0.5, 0.5], 0.5
+    verts = np.vstack([np.sin(theta), np.cos(theta)]).T
+    circle = mpath.Path(verts * radius + center)
+    
+    vfont = {'fontname':'Verdana'}
+    axs.set_extent([180, -180, 50, 90], crs=ccrs.PlateCarree())
+    axs.set_boundary(circle, transform=axs.transAxes)
+    axs.set_facecolor('0.8')
+    
+    ## thaw timing
+    cf1 = axs.pcolormesh(lon2,lat,var,transform=ccrs.PlateCarree(), 
+                  norm=norm, cmap=cmap)
+    axs.coastlines(linewidth=0.4)
+    axs.set_title("Ens 0" + str(i), fontsize=7.5, y=0.99, **vfont)
+    return cf1
