@@ -105,7 +105,7 @@ def make_maps(var1,latitude,longitude,vmins,vmaxs,levs,mycmap,label,title,saveti
     
     ## Create figure
     fig = plt.figure(figsize=(10,8))
-    if vmins < 0. and vmins > 0.:
+    if vmins < 0. and vmaxs > 0.:
         norm = mcolors.TwoSlopeNorm(vmin=vmins, vcenter=0, vmax=vmaxs)
     else:
         norm = mcolors.Normalize(vmin=vmins, vmax=vmaxs)
