@@ -76,6 +76,7 @@ def make_maps(var1,latitude,longitude,vmins,vmaxs,levs,mycmap,label,title,saveti
     brbg_cmap,rdbu_cmap,jet,magma,reds,hot,seismic = get_colormap(levs)
     cmapLand = c.ListedColormap(['xkcd:gray','none'])
     
+    import matplotlib as mpl
     import cartopy.crs as ccrs
     from cartopy.util import add_cyclic_point
     from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
@@ -106,9 +107,9 @@ def make_maps(var1,latitude,longitude,vmins,vmaxs,levs,mycmap,label,title,saveti
     ## Create figure
     fig = plt.figure(figsize=(10,8))
     if vmins < 0. and vmaxs > 0.:
-        norm = mcolors.TwoSlopeNorm(vmin=vmins, vcenter=0, vmax=vmaxs)
+        norm1 = mcolors.TwoSlopeNorm(vmin=vmins, vcenter=0, vmax=vmaxs)
     else:
-        norm = mcolors.Normalize(vmin=vmins, vmax=vmaxs)
+        norm1 = mcolors.Normalize(vmin=vmins, vmax=vmaxs)
         
     ## Create North Pole Stereo projection map with circle boundary
     ax = fig.add_subplot(1, 1, 1, projection=ccrs.NorthPolarStereo())
@@ -122,7 +123,7 @@ def make_maps(var1,latitude,longitude,vmins,vmaxs,levs,mycmap,label,title,saveti
     
     ## field to be plotted
     cf1 = ax.pcolormesh(lon,latitude,var,transform=ccrs.PlateCarree(), 
-                  norm=norm, cmap=mycmap)
+                  norm=norm1, cmap=mycmap)
     
     ax.coastlines(linewidth=0.8)
     ## land mask
@@ -175,11 +176,17 @@ def make_maps(var1,latitude,longitude,vmins,vmaxs,levs,mycmap,label,title,saveti
                                         transform=ccrs.PlateCarree()))
 
     if mycmap == magma:
-        cbar = plt.colorbar(cf1, ax=ax, ticks=[0,10,20,30,40,50], extend=extend, fraction=0.028)
+        cbar = fig.colorbar(mpl.cm.ScalarMappable(norm=norm1, cmap=mycmap),
+                 ax=ax, orientation='horizontal',ticks=[0,10,20,30,40,50], extend=extend, fraction=0.028)
+        # cbar = plt.colorbar(cf1, ax=ax, ticks=[0,10,20,30,40,50], extend=extend, fraction=0.028)
         cbar.ax.set_yticklabels(['2015','2025','2035','2045','2055','2065'], **hfont)
     elif label == ' ':
-        cbar = plt.colorbar(cf1, ax=ax, extend=extend, orientation='horizontal',fraction=0.051, 
-                            ticks=[0,31,59,90,120,151,181,212,243,273,304,334])
+        cbar = fig.colorbar(mpl.cm.ScalarMappable(norm=norm1, cmap=mycmap),
+                 ax=ax, extend=extend, rientation='horizontal',fraction=0.051, 
+                                     ticks=[0,31,59,90,120,151,181,212,243,273,304,334])
+        
+        # cbar = plt.colorbar(cf1, ax=ax, extend=extend, orientation='horizontal',fraction=0.051, 
+        #                     ticks=[0,31,59,90,120,151,181,212,243,273,304,334])
         cbar.ax.tick_params(labelsize=12)
         cbar.ax.set_xticklabels(['Jan 1','Feb 1','Mar 1','Apr 1','May 1',
                                         'Jun 1','Jul 1','Aug 1','Sep 1','Oct 1',
@@ -187,8 +194,15 @@ def make_maps(var1,latitude,longitude,vmins,vmaxs,levs,mycmap,label,title,saveti
         cbar.ax.tick_params(rotation=30)
     else:
         # horizontal cbar at bottom
-        cbar = plt.colorbar(cf1, ax=ax, extend=extend, orientation='horizontal',fraction=0.049)
+        cbar = fig.colorbar(mpl.cm.ScalarMappable(norm=norm1, cmap=mycmap),
+                 ax=ax, extend=extend, orientation='horizontal',fraction=0.049)
+        # cbar = plt.colorbar(cf1, ax=ax, extend=extend, orientation='horizontal',fraction=0.049)
         cbar.ax.tick_params(labelsize=14)
+    
+    
+    cbar.ax.tick_params(labelsize=14)
+    cbar.set_label(str(label), fontsize=14, fontweight='bold') 
+    
     cbar.set_label(str(label), fontsize=14, fontweight='bold')
     plt.title(str(title), fontsize=16, fontweight='bold', **hfont, y=1.07)
     ## Save figure
